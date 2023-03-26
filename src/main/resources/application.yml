@@ -7,6 +7,7 @@ spring:
       printer:
         enabled: true
 
+
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb
@@ -19,3 +20,9 @@ spring:
     hibernate:
       format_sql: true
       ddl-auto: create
+
+logging:
+  level:
+    root: WARN
+  file:
+    name: logs/backendapp.log
