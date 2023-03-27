@@ -1,12 +1,14 @@
 package com.example.demo;
 
 import com.example.demo.application.domain.Book;
+import com.example.demo.application.port.inbound.BookInput;
 import com.example.demo.application.port.inbound.BookOutput;
 import com.example.demo.application.port.outbound.BookOutboundPort;
 import com.example.demo.application.service.BookService;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 public class UnitTests {
 
@@ -38,9 +41,38 @@ public class UnitTests {
                 }));
     }
 
+    @TestFactory
+    Stream<DynamicTest> testCoverage() {
+        bookOutboundPort = new TestBookOutboundPort();
+        bookService = new BookService(bookOutboundPort);
+
+        return Stream.of(
+                DynamicTest.dynamicTest("getByTitle", () -> {
+                    bookService.getByTitle("책");
+                }),
+                DynamicTest.dynamicTest("getByTitle", () -> {
+                    assertThatThrownBy(()-> bookService.getByTitle("없는책")).isInstanceOf(EntityNotFoundException.class);
+                }),
+                DynamicTest.dynamicTest("update", () -> {
+                    BookInput bookInput = new BookInput("id","title",0);
+                    bookService.update(bookInput);
+                }),
+                DynamicTest.dynamicTest("update", () -> {
+                    BookInput bookInput = new BookInput("not","title",0);
+                    assertThatThrownBy(() -> bookService.update(bookInput)).isInstanceOf(EntityNotFoundException.class);
+                }),
+                DynamicTest.dynamicTest("delete", () -> {
+                    bookService.deleteById("id");
+                })
+        );
+    }
+
     private static class TestBookOutboundPort implements BookOutboundPort {
         @Override
         public Optional<Book> findByTitle(String title) {
+            if (title.equals("책")){
+                return Optional.of(new Book("id","책",0));
+            }
             return Optional.empty();
         }
 
@@ -53,11 +85,14 @@ public class UnitTests {
 
         @Override
         public Book save(Book bookDomain) {
-            return null;
+            return bookDomain;
         }
 
         @Override
         public Optional<Book> findById(String id) {
+            if (id.equals("id")){
+                return Optional.of(new Book("id","title",0));
+            }
             return Optional.empty();
         }
 
