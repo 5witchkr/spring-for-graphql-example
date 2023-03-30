@@ -1,11 +1,22 @@
 
 spring:
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            clientId: 686443762178-0gqta3eseri3r7gejdf242prqtrm69l3.apps.googleusercontent.com
+#            clientSecret: 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
+#            scope:
+#              - email
+
   graphql:
     graphiql:
       ##enable graphiql
       enabled: true
       printer:
         enabled: true
+
 
 
   datasource:
@@ -20,9 +31,18 @@ spring:
     hibernate:
       format_sql: true
       ddl-auto: create
-
 logging:
   level:
-    root: WARN
-  file:
-    name: logs/backendapp.log
+    org:
+      springframework:
+        security:
+          oauth2: DEBUG
+        web:
+          client:
+            RestTemplate: DEBUG
+      apache:
+        http: DEBUG
+    httpclient:
+      wire: DEBUG
+#  file:
+#    name: logs/backendapp.log
